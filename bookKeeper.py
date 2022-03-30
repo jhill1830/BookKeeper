@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+from lib2to3.pgen2.token import COMMENT
+from tkinter.tix import NoteBook
 import urllib.request
 import urllib.parse
 import urllib.error
+from xml.etree.ElementTree import Comment
 from bs4 import BeautifulSoup
 
 # ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
@@ -21,7 +24,7 @@ from bs4 import BeautifulSoup
 
 # scrub(string)
 # print(string)
-
+# ! variable 'url' below won't work as the website itself is blocking the request.  FIgure out workaround, once a basic webscraper is working on sites that do allow it
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 
@@ -34,5 +37,5 @@ pTags = soup('h1')          # finds only selected elements eg. 'h1'
 for tags in pTags:          # iterate line by line through site
     print(tags.get_text())  # print only the text of the selected element
 
-# print(pTags.__sizeof__())
+# print(pTags.get_text())
 # print(fhand.read())
