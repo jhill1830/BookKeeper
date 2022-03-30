@@ -16,14 +16,6 @@ from bs4 import BeautifulSoup
 # ? Must keep track of which chapter it is up to (use JSON file?), so as to only add new chapters to the offline file, and not duplicate already read and written chapters.
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
 
-#string = "this is a test string"
-# def scrub(str):
-#    print(str)
-#    return
-
-
-# scrub(string)
-# print(string)
 # ! variable 'url' below won't work as the website itself is blocking the request.  FIgure out workaround, once a basic webscraper is working on sites that do allow it
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
