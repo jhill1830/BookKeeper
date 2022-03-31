@@ -99,7 +99,7 @@ data['books']['book2']['chapter'] += 1  # Increment chapter by 1
 # Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
 with open(jsonFile, 'w') as writeFile:
 
-    # .dump turn the data object into a string, as it can't write an object into the file
+    # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
     json.dump(data, writeFile, indent=4)
 
 
