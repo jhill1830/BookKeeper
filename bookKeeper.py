@@ -32,15 +32,19 @@ soup = BeautifulSoup(urlOpen, 'html.parser')
 # ? ----------------- WRITE TO FILE -----------------
 def scrub(site, book):  # scrubbing function
     pTags = site('h1')  # finds only selected elements eg. 'h1'
-    with open(book, 'w') as file:    # open file to write to
+
+    # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
+    with open(book, 'a') as file:
         for tags in pTags:           # iterate line by line through site
             line = tags.get_text()   # print only the text of the selected element
             file.write(line + '\n')  # write line to file and add newline
-    with open(book, 'r') as file:
+
+    with open(book, 'r') as file:   # Read File
         print(file.read())
+        characters = file.tell()    # Counts the number of characters in the file
+        print(characters)
 
 
 scrub(soup, bookFile)
-
 
 # ? ----------------- UPDATE JSON -----------------
