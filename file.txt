@@ -1,0 +1,18 @@
+Beautiful Soup Documentation¶
+Quick Start¶
+Installing Beautiful Soup¶
+Making the soup¶
+Kinds of objects¶
+Navigating the tree¶
+Searching the tree¶
+Modifying the tree¶
+Output¶
+Specifying the parser to use¶
+Encodings¶
+Line numbers¶
+Comparing objects for equality¶
+Copying Beautiful Soup objects¶
+Parsing only part of a document¶
+Troubleshooting¶
+Translating this documentation¶
+Beautiful Soup 3¶

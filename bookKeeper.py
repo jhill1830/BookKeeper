@@ -16,18 +16,31 @@ from bs4 import BeautifulSoup
 # ? Must keep track of which chapter it is up to (use JSON file?), so as to only add new chapters to the offline file, and not duplicate already read and written chapters.
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
 
-# ! variable 'url' below won't work as the website itself is blocking the request.  FIgure out workaround, once a basic webscraper is working on sites that do allow it
+# ? ----------------- INPUTS -----------------
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 
-fhand = urllib.request.urlopen(testUrl).read()
-soup = BeautifulSoup(fhand, 'html.parser')
-# for line in fhand:
-#    print(line.decode().strip())
+# TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag?)
+bookFile = 'file.txt'
 
-pTags = soup('h1')          # finds only selected elements eg. 'h1'
-for tags in pTags:          # iterate line by line through site
-    print(tags.get_text())  # print only the text of the selected element
+# ? ----------------- File/URL Reading -----------------
+# ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
+urlOpen = urllib.request.urlopen(testUrl).read()
+soup = BeautifulSoup(urlOpen, 'html.parser')
 
-# print(pTags.get_text())
-# print(fhand.read())
+
+# ? ----------------- WRITE TO FILE -----------------
+def scrub(site, book):  # scrubbing function
+    pTags = site('h1')  # finds only selected elements eg. 'h1'
+    with open(book, 'w') as file:    # open file to write to
+        for tags in pTags:           # iterate line by line through site
+            line = tags.get_text()   # print only the text of the selected element
+            file.write(line + '\n')  # write line to file and add newline
+    with open(book, 'r') as file:
+        print(file.read())
+
+
+scrub(soup, bookFile)
+
+
+# ? ----------------- UPDATE JSON -----------------
