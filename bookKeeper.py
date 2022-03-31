@@ -94,8 +94,7 @@ data = json.load(open(jsonFile, 'r'))
 print(data['books']['book2']["chapter"])
 
 # Update targeted key's value in new 'data' json object
-data['books']['book2']['chapter'] = 11
-print(data['books']['book2']["chapter"])
+data['books']['book2']['chapter'] += 1  # Increment chapter by 1
 
 # Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
 with open(jsonFile, 'w') as writeFile:
@@ -106,3 +105,5 @@ with open(jsonFile, 'w') as writeFile:
 
 data = json.load(open(jsonFile, 'r'))
 print(data['books']['book2']["chapter"])
+
+# Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
