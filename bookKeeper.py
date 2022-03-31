@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-from lib2to3.pgen2.token import COMMENT
-from tkinter.tix import NoteBook
 import urllib.request
 import urllib.parse
 import urllib.error
-from xml.etree.ElementTree import Comment
 from bs4 import BeautifulSoup
 
 # ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
@@ -17,34 +14,67 @@ from bs4 import BeautifulSoup
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
 
 # ? ----------------- INPUTS -----------------
+# ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
-testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
+# testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
+testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag?)
 bookFile = 'file.txt'
+json = 'library.json'
+
 
 # ? ----------------- File/URL Reading -----------------
-# ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
-urlOpen = urllib.request.urlopen(testUrl).read()
-soup = BeautifulSoup(urlOpen, 'html.parser')
+
+def scrub(site, book):  # scrubbing function
+    urlOpen = urllib.request.urlopen(site).read()
+    soup = BeautifulSoup(urlOpen, 'html.parser')
+    pTags = soup('p')  # finds only selected tags eg. 'h1'
+
+    # Use JSON file to find which chapter it is up to and reference that against most recent update for site. Potentially use this as the chapter variable as well(~ chapter = json.chapter + 1)
+    # ### Use if statement if chapter on site is larger than in json file. Also check if it's a dummy page using number on character in p tag?
+    # ### Return and finish executing program as there is nothing to update
+
+    # IF no new chapter to write: RETURN/close program
+
+    # IF book exists and new chapter to write:
+    writeBook(book, pTags)  # write to file function
+    updateChapter(0)  # update chapter json
+
+    # IF book !exist: writeBook, updateChapter, updateLibrary
 
 
 # ? ----------------- WRITE TO FILE -----------------
-def scrub(site, book):  # scrubbing function
-    pTags = site('h1')  # finds only selected elements eg. 'h1'
+
+def writeBook(book, tag):
+    # Potentially use JSON as the chapter variable as well(~ chapter = json.chapter + 1)
+    chapter = 'test 0'
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
-    with open(book, 'a') as file:
-        for tags in pTags:           # iterate line by line through site
+    with open(book, 'w') as file:
+        file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
+        for tags in tag:           # iterate line by line through site
             line = tags.get_text()   # print only the text of the selected element
             file.write(line + '\n')  # write line to file and add newline
+        file.write('\n'*2)
 
-    with open(book, 'r') as file:   # Read File
-        print(file.read())
-        characters = file.tell()    # Counts the number of characters in the file
-        print(characters)
-
-
-scrub(soup, bookFile)
 
 # ? ----------------- UPDATE JSON -----------------
+
+def updateChapter(json):
+    # update file's chapter += 1
+    return
+
+
+def updateLibrary(json):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
+    # add book name to list
+    return
+# Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
+
+
+scrub(testUrl, bookFile)
+
+with open(bookFile, 'r') as file:   # Read File
+    print(file.read())
+    characters = file.tell()    # Counts the number of characters in the file
+    print(characters)
