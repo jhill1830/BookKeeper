@@ -2,6 +2,7 @@
 import urllib.request
 import urllib.parse
 import urllib.error
+import json
 from bs4 import BeautifulSoup
 
 # ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
@@ -19,9 +20,9 @@ url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
-# TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag?)
+# TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 bookFile = 'file.txt'
-json = 'library.json'
+jsonFile = 'library.json'
 
 
 # ? ----------------- File/URL Reading -----------------
@@ -31,23 +32,26 @@ def scrub(site, book):  # scrubbing function
     soup = BeautifulSoup(urlOpen, 'html.parser')
     pTags = soup('p')  # finds only selected tags eg. 'h1'
 
-    # Use JSON file to find which chapter it is up to and reference that against most recent update for site. Potentially use this as the chapter variable as well(~ chapter = json.chapter + 1)
-    # ### Use if statement if chapter on site is larger than in json file. Also check if it's a dummy page using number on character in p tag?
-    # ### Return and finish executing program as there is nothing to update
+    # TODO Use JSON file to find which chapter it is up to and reference that against most recent update for site. Potentially use this as the chapter variable as well(~ chapter = json.chapter + 1)
+    # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
+    # ### Return and finish executing program if there is nothing to update
 
-    # IF no new chapter to write: RETURN/close program
+# TODO write if statements for book existence etc
+    # IF book exists and no new chapter to write: RETURN/close program
 
     # IF book exists and new chapter to write:
-    writeBook(book, pTags)  # write to file function
+    writeBook(book, pTags)  # write to file function.
     updateChapter(0)  # update chapter json
 
     # IF book !exist: writeBook, updateChapter, updateLibrary
+
+    # ELSE: return/close program if something unnexpected happens
 
 
 # ? ----------------- WRITE TO FILE -----------------
 
 def writeBook(book, tag):
-    # Potentially use JSON as the chapter variable as well(~ chapter = json.chapter + 1)
+    # TODO Potentially use JSON as the chapter variable as well(~ chapter = json.chapter + 1)
     chapter = 'test 0'
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
@@ -72,9 +76,33 @@ def updateLibrary(json):  # Dunno if necessary. Might use a book list to referen
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
 
-scrub(testUrl, bookFile)
+# scrub(testUrl, bookFile)
 
-with open(bookFile, 'r') as file:   # Read File
-    print(file.read())
-    characters = file.tell()    # Counts the number of characters in the file
-    print(characters)
+# with open(bookFile, 'r') as file:   # Read File
+#    print(file.read())
+#    characters = file.tell()    # Counts the number of characters in the file
+#    print(characters)
+
+# with open('library.json') as file:
+# source = file.read()
+
+
+# ? #### READING AND WRITING TO JSON
+# TODO Need to clean this up and turn into proper function as this is just to learn how to utilise json files
+# Load in external json file and create new object with it's data
+data = json.load(open(jsonFile, 'r'))
+print(data['books']['book2']["chapter"])
+
+# Update targeted key's value in new 'data' json object
+data['books']['book2']['chapter'] = 11
+print(data['books']['book2']["chapter"])
+
+# Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
+with open(jsonFile, 'w') as writeFile:
+
+    # .dump turn the data object into a string, as it can't write an object into the file
+    json.dump(data, writeFile, indent=4)
+
+
+data = json.load(open(jsonFile, 'r'))
+print(data['books']['book2']["chapter"])

@@ -1,0 +1,12 @@
+{
+    "books": {
+        "book1": {
+            "title": "booktitle1",
+            "chapter": 0
+        },
+        "book2": {
+            "title": "booktitle2",
+            "chapter": 11
+        }
+    }
+}
