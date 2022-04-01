@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from msilib import schema
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -16,13 +17,16 @@ from bs4 import BeautifulSoup
 
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
+#       # Use shell argument to define url
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
-bookFile = 'file.txt'
-jsonFile = 'library.json'
+# Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
+bookTitle = 'book1'
+bookFile = bookTitle + '.txt'   # Use shell argument to define book file to write to
+libraryJson = 'library.json'
 
 
 # ? ----------------- File/URL Reading -----------------
@@ -40,8 +44,8 @@ def scrub(site, book):  # scrubbing function
     # IF book exists and no new chapter to write: RETURN/close program
 
     # IF book exists and new chapter to write:
-    writeBook(book, pTags)  # write to file function.
-    updateChapter(0)  # update chapter json
+    writeBook(book, pTags, libraryJson)  # write to file function.
+    updateChapter(bookTitle, libraryJson)  # update chapter json
 
     # IF book !exist: writeBook, updateChapter, updateLibrary
 
@@ -50,33 +54,45 @@ def scrub(site, book):  # scrubbing function
 
 # ? ----------------- WRITE TO FILE -----------------
 
-def writeBook(book, tag):
-    # TODO Potentially use JSON as the chapter variable as well(~ chapter = json.chapter + 1)
-    chapter = 'test 0'
+def writeBook(book, tag, jsonFile):
+    data = json.load(open(jsonFile, 'r'))  # Load in json
+    chapter = data['books'][bookTitle]['chapter']  # Read chapter data
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
-    with open(book, 'w') as file:
+    with open(book, 'a') as file:
         file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
         for tags in tag:           # iterate line by line through site
             line = tags.get_text()   # print only the text of the selected element
             file.write(line + '\n')  # write line to file and add newline
-        file.write('\n'*2)
+        file.write('\n'*3)
 
 
 # ? ----------------- UPDATE JSON -----------------
 
-def updateChapter(json):
-    # update file's chapter += 1
+def updateChapter(book, jsonFile):    # update file's chapter + 1
+    # Load in external json file and create new object with it's data
+    data = json.load(open(jsonFile, 'r'))
+    print(data['books'][book]['chapter'])
+    # Update targeted key's value in new 'data' json object
+    data['books'][book]['chapter'] += 1  # Increment chapter by 1
+
+    # Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
+    with open(jsonFile, 'w') as writeFile:
+        # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
+        json.dump(data, writeFile, indent=4)
+
+    data = json.load(open(jsonFile, 'r'))
+    print(data['books']['book1']["chapter"])
     return
 
 
-def updateLibrary(json):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
+def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
     # add book name to list
     return
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
 
-# scrub(testUrl, bookFile)
+scrub(testUrl, bookFile)
 
 # with open(bookFile, 'r') as file:   # Read File
 #    print(file.read())
@@ -88,22 +104,24 @@ def updateLibrary(json):  # Dunno if necessary. Might use a book list to referen
 
 
 # ? #### READING AND WRITING TO JSON
+
+
 # TODO Need to clean this up and turn into proper function as this is just to learn how to utilise json files
-# Load in external json file and create new object with it's data
-data = json.load(open(jsonFile, 'r'))
-print(data['books']['book2']["chapter"])
+# # Load in external json file and create new object with it's data
+# data = json.load(open(jsonFile, 'r'))
+# print(data['books']['book2']["chapter"])
+#
+# # Update targeted key's value in new 'data' json object
+# data['books']['book2']['chapter'] += 1  # Increment chapter by 1
+#
+# # Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
+# with open(jsonFile, 'w') as writeFile:
+#
+#     # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
+#     json.dump(data, writeFile, indent=4)
+#
+#
+# data = json.load(open(jsonFile, 'r'))
+# print(data['books']['book2']["chapter"])
 
-# Update targeted key's value in new 'data' json object
-data['books']['book2']['chapter'] += 1  # Increment chapter by 1
-
-# Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
-with open(jsonFile, 'w') as writeFile:
-
-    # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
-    json.dump(data, writeFile, indent=4)
-
-
-data = json.load(open(jsonFile, 'r'))
-print(data['books']['book2']["chapter"])
-
-# Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
+# TODO Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
