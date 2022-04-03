@@ -24,14 +24,22 @@ testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 # Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
-bookTitle = 'book4'
+bookTitle = 'book7'
 bookFile = bookTitle + '.txt'   # Use shell argument to define book file to write to
 libraryJson = 'library.json'
+#
+#
+#
+#
+#
+#
+#
+#
 
 
 # ? ----------------- File/URL Reading -----------------
 
-def scrub(site, book):  # scrubbing function
+def scrub(site, bookfile):  # scrubbing function
     urlOpen = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(urlOpen, 'html.parser')
     pTags = soup('p')  # finds only selected tags eg. 'h1'
@@ -41,33 +49,65 @@ def scrub(site, book):  # scrubbing function
     # ### Return and finish executing program if there is nothing to update
 
 # TODO write if statements for book existence etc
+
+# # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
+
+    data = json.load(open(libraryJson, 'r'))
+    try:
+        # Check if book exists in library
+        # and data['books'][bookTitle] < currentChapter: NOTE: current chapter checked by url ending?
+        if data['books'][bookTitle]:
+            print('Book Found')
+            writeBook(bookfile, pTags, libraryJson)
+            updateChapter(bookTitle, libraryJson)
+            print("Updated " + bookTitle)
+            return
+
+    except:
+        # IF book !exist: writeBook, updateChapter, updateLibrary
+        updateLibrary(bookTitle, libraryJson)
+        updateChapter(bookTitle, libraryJson)
+        writeBook(bookfile, pTags, libraryJson)
+        return
+
     # IF book exists and no new chapter to write: RETURN/close program
 
     # IF book exists and new chapter to write:
-    writeBook(book, pTags, libraryJson)  # write to file function.
-    updateChapter(bookTitle, libraryJson)  # update chapter json
-
-    # IF book !exist: writeBook, updateChapter, updateLibrary
 
     # ELSE: return/close program if something unnexpected happens
+#
+#
+#
+#
+#
+#
+#
 
 
 # ? ----------------- WRITE TO FILE -----------------
 
-def writeBook(book, tag, jsonFile):
+def writeBook(bookfile, tag, jsonFile):  # write to file function.
     data = json.load(open(jsonFile, 'r'))  # Load in json
     chapter = data['books'][bookTitle]['chapter']  # Read chapter data
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
-    with open(book, 'a') as file:
+    with open(bookfile, 'a') as file:
         file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
         for tags in tag:           # iterate line by line through site
             line = tags.get_text()   # print only the text of the selected element
             file.write(line + '\n')  # write line to file and add newline
-        file.write('\n'*3)
+        file.write('\n'*2)
+
+#
+#
+#
+#
+#
+#
+#
 
 
-# ? ----------------- UPDATE JSON -----------------
+# ? ----------------- UPDATE CHAPTER -----------------
 
 def updateChapter(book, jsonFile):    # update file's chapter + 1
     # Load in external json file and create new object with it's data
@@ -85,52 +125,35 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
     print(data['books'][book]["chapter"])
     return
 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
+# ? ----------------- UPDATE LIBRARY -----------------
+
 
 # BUG: this functions will update the json file in the wrong format if used on a pre-existing key/entry.  But works properly if sed to create a new entry
 def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
-    # add book name to list
     data = json.load(open(jsonFile, 'r'))
     data['books'][book] = {'title': book, 'chapter': 0}
 
-    print(data['books'])
-
     with open(jsonFile, 'r+') as updateFile:
         json.dump(data, updateFile, indent=4)
+    print('Added New Book: ' + book)
     return
+
+
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
 
-#scrub(testUrl, bookFile)
-updateLibrary(bookTitle, libraryJson)
-
-# with open(bookFile, 'r') as file:   # Read File
-#    print(file.read())
-#    characters = file.tell()    # Counts the number of characters in the file
-#    print(characters)
-
-# with open('library.json') as file:
-# source = file.read()
-
-
-# ? #### READING AND WRITING TO JSON
-
-
-# TODO Need to clean this up and turn into proper function as this is just to learn how to utilise json files
-# # Load in external json file and create new object with it's data
-# data = json.load(open(jsonFile, 'r'))
-# print(data['books']['book2']["chapter"])
-#
-# # Update targeted key's value in new 'data' json object
-# data['books']['book2']['chapter'] += 1  # Increment chapter by 1
-#
-# # Either write newfile or rewrite previous file(rewrite in this case) using the new 'data' json object
-# with open(jsonFile, 'w') as writeFile:
-#
-#     # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
-#     json.dump(data, writeFile, indent=4)
-#
-#
-# data = json.load(open(jsonFile, 'r'))
-# print(data['books']['book2']["chapter"])
+scrub(testUrl, bookFile)
+#updateLibrary(bookTitle, libraryJson)
 
 # TODO Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
