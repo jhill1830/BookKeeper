@@ -47,7 +47,6 @@ def scrub(site, bookfile):  # scrubbing function
     soup = BeautifulSoup(urlOpen, 'html.parser')
     pTags = soup('p')  # finds only selected tags eg. 'h1'
 
-    # TODO Use JSON file to find which chapter it is up to and reference that against most recent update for site. Potentially use this as the chapter variable as well(~ chapter = json.chapter + 1)
     # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
     # ### Return and finish executing program if there is nothing to update
 
@@ -154,9 +153,5 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 
 
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
-
-
-# TODO Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
-
 
 scrub(testUrl, bookFile)

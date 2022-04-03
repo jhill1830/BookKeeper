@@ -11,6 +11,10 @@
         "bookTest": {
             "title": "bookTest",
             "chapter": 4
+        },
+        "book": {
+            "title": "book",
+            "chapter": 2
         }
     }
 }
