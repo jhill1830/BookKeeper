@@ -1,11 +1,23 @@
 {
     "books": {
         "book1": {
-            "title": "booktitle1",
-            "chapter": 2
+            "title": "book1",
+            "chapter": 0
         },
         "book2": {
             "title": "booktitle2",
+            "chapter": 0
+        },
+        "newBookTest": {
+            "title": "New Book Value",
+            "chapter": 0
+        },
+        "book3": {
+            "title": "book3",
+            "chapter": 0
+        },
+        "book4": {
+            "title": "book4",
             "chapter": 0
         }
     }

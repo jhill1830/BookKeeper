@@ -24,7 +24,7 @@ testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 # Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
-bookTitle = 'book1'
+bookTitle = 'book4'
 bookFile = bookTitle + '.txt'   # Use shell argument to define book file to write to
 libraryJson = 'library.json'
 
@@ -82,17 +82,26 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
         json.dump(data, writeFile, indent=4)
 
     data = json.load(open(jsonFile, 'r'))
-    print(data['books']['book1']["chapter"])
+    print(data['books'][book]["chapter"])
     return
 
 
+# BUG: this functions will update the json file in the wrong format if used on a pre-existing key/entry.  But works properly if sed to create a new entry
 def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
     # add book name to list
+    data = json.load(open(jsonFile, 'r'))
+    data['books'][book] = {'title': book, 'chapter': 0}
+
+    print(data['books'])
+
+    with open(jsonFile, 'r+') as updateFile:
+        json.dump(data, updateFile, indent=4)
     return
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
 
-scrub(testUrl, bookFile)
+#scrub(testUrl, bookFile)
+updateLibrary(bookTitle, libraryJson)
 
 # with open(bookFile, 'r') as file:   # Read File
 #    print(file.read())
