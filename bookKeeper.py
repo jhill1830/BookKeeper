@@ -4,6 +4,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import json
+import sys
 from bs4 import BeautifulSoup
 
 # ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
@@ -24,9 +25,11 @@ testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 # Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
-bookTitle = 'book7'
+bookTitle = sys.argv[1]
 bookFile = bookTitle + '.txt'   # Use shell argument to define book file to write to
 libraryJson = 'library.json'
+argTest = sys.argv[1]
+print(argTest)
 #
 #
 #
@@ -55,7 +58,7 @@ def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     try:
         # Check if book exists in library
-        # and data['books'][bookTitle] < currentChapter: NOTE: current chapter checked by url ending?
+        # and data['books'][bookTitle] === currentChapter: NOTE: current chapter checked by url ending?
         if data['books'][bookTitle]:
             print('Book Found')
             writeBook(bookfile, pTags, libraryJson)
@@ -66,8 +69,8 @@ def scrub(site, bookfile):  # scrubbing function
     except:
         # IF book !exist: writeBook, updateChapter, updateLibrary
         updateLibrary(bookTitle, libraryJson)
-        updateChapter(bookTitle, libraryJson)
         writeBook(bookfile, pTags, libraryJson)
+        updateChapter(bookTitle, libraryJson)
         return
 
     # IF book exists and no new chapter to write: RETURN/close program
@@ -142,7 +145,7 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
 # BUG: this functions will update the json file in the wrong format if used on a pre-existing key/entry.  But works properly if sed to create a new entry
 def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list to reference so that if the book exists already, then append('a') to the corresponding file, otherwise, write('w') to new file
     data = json.load(open(jsonFile, 'r'))
-    data['books'][book] = {'title': book, 'chapter': 0}
+    data['books'][book] = {'title': book, 'chapter': 1}
 
     with open(jsonFile, 'r+') as updateFile:
         json.dump(data, updateFile, indent=4)
@@ -153,7 +156,7 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
 
-scrub(testUrl, bookFile)
-#updateLibrary(bookTitle, libraryJson)
-
 # TODO Need to write schema to add new books into json file.  Will add this if the shell's book argument isn't already recognised in json book titles
+
+
+scrub(testUrl, bookFile)
