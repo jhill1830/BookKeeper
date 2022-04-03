@@ -19,10 +19,9 @@ from bs4 import BeautifulSoup
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
 #       # Use shell argument to define url
-url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
+url = 'https://novelfull.com/reverend-insanity/chapter-'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
-bookUrl = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
@@ -41,40 +40,47 @@ print(argTest)
 #
 #
 
-
 # ? ----------------- File/URL Reading -----------------
 
+
 def scrub(site, bookfile):  # scrubbing function
-    req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
-    urlOpen = urlopen(site).read()
-    soup = BeautifulSoup(urlOpen, 'html.parser')
-    pTags = soup('p')  # finds only selected tags eg. 'h1'
-
-    # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
-    # ### Return and finish executing program if there is nothing to update
-
-# TODO write if statements for book existence etc
-
-# # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
-
     data = json.load(open(libraryJson, 'r'))
-    try:
-        # Check if book exists in library
-        # and data['books'][bookTitle] === currentChapter: NOTE: current chapter checked by url ending?
-        if data['books'][bookTitle]:
-            print('Book Found')
+    if data['books'][bookTitle]['chapter'] < 10:
+        bookUrl = site + str(data['books'][bookTitle]['chapter']) + '.html'
+        req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
+        urlOpen = urlopen(req).read()
+        soup = BeautifulSoup(urlOpen, 'html.parser')
+        pTags = soup('p')  # finds only selected tags eg. 'h1'
+
+        # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
+        # ### Return and finish executing program if there is nothing to update
+
+    # TODO write if statements for book existence etc
+
+    # # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
+
+        data = json.load(open(libraryJson, 'r'))
+        try:
+            # Check if book exists in library
+            # and data['books'][bookTitle] === currentChapter: NOTE: current chapter checked by url ending?
+            if data['books'][bookTitle]:
+                print('Book Found')
+                writeBook(bookfile, pTags, libraryJson)
+                updateChapter(bookTitle, libraryJson)
+                print("Updated " + bookTitle)
+                scrub(site, bookfile)
+                return
+
+        except:
+            # IF book !exist: writeBook, updateChapter, updateLibrary
+            updateLibrary(bookTitle, libraryJson)
             writeBook(bookfile, pTags, libraryJson)
             updateChapter(bookTitle, libraryJson)
-            print("Updated " + bookTitle)
+            scrub(site, bookfile)
             return
 
-    except:
-        # IF book !exist: writeBook, updateChapter, updateLibrary
-        updateLibrary(bookTitle, libraryJson)
-        writeBook(bookfile, pTags, libraryJson)
-        updateChapter(bookTitle, libraryJson)
+    else:
         return
-
     # IF book exists and no new chapter to write: RETURN/close program
 
     # IF book exists and new chapter to write:
@@ -99,11 +105,14 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
     with open(bookfile, 'a') as file:
-        file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
-        for tags in tag:           # iterate line by line through site
-            line = tags.get_text()   # print only the text of the selected element
-            file.write(line + '\n'*2)  # write line to file and add newline
-        file.write('\n'*2)
+        try:
+            file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
+            for tags in tag:           # iterate line by line through site
+                line = tags.get_text()   # print only the text of the selected element
+                file.write(line + '\n'*2)  # write line to file and add newline
+            file.write('\n'*2)
+        except:  # Used to capture characters that can't be encoded.  EG katakana etc.
+            return
 
 #
 #
@@ -159,4 +168,4 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
-scrub(req, bookFile)
+scrub(url, bookFile)
