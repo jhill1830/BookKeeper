@@ -1,20 +1,8 @@
 {
     "books": {
-        "book1": {
-            "title": "book1",
+        "Reverend Insanity": {
+            "title": "Reverend Insanity",
             "chapter": 1
-        },
-        "book7": {
-            "title": "book7",
-            "chapter": 4
-        },
-        "bookTest": {
-            "title": "bookTest",
-            "chapter": 4
-        },
-        "book": {
-            "title": "book",
-            "chapter": 2
         }
     }
 }

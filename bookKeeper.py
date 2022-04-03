@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from msilib import schema
-import urllib.request
+from urllib.request import Request, urlopen
 import urllib.parse
 import urllib.error
 import json
@@ -22,6 +22,8 @@ from bs4 import BeautifulSoup
 url = 'https://novelfull.com/reverend-insanity/chapter-323.html'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
+bookUrl = 'https://novelfull.com/reverend-insanity/chapter-323.html'
+
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 # Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
@@ -43,7 +45,8 @@ print(argTest)
 # ? ----------------- File/URL Reading -----------------
 
 def scrub(site, bookfile):  # scrubbing function
-    urlOpen = urllib.request.urlopen(site).read()
+    req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
+    urlOpen = urlopen(site).read()
     soup = BeautifulSoup(urlOpen, 'html.parser')
     pTags = soup('p')  # finds only selected tags eg. 'h1'
 
@@ -77,6 +80,8 @@ def scrub(site, bookfile):  # scrubbing function
     # IF book exists and new chapter to write:
 
     # ELSE: return/close program if something unnexpected happens
+
+    #scrub(site, bookfile)
 #
 #
 #
@@ -97,7 +102,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
         file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
         for tags in tag:           # iterate line by line through site
             line = tags.get_text()   # print only the text of the selected element
-            file.write(line + '\n')  # write line to file and add newline
+            file.write(line + '\n'*2)  # write line to file and add newline
         file.write('\n'*2)
 
 #
@@ -154,4 +159,4 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
-scrub(testUrl, bookFile)
+scrub(req, bookFile)
