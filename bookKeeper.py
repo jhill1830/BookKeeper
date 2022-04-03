@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 # ? Maybe choose which file to write to using the arguments in the shell script
 # ? Must keep track of which chapter it is up to (use JSON file?), so as to only add new chapters to the offline file, and not duplicate already read and written chapters.
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
+# TODO might have to write something to automate the chapter names if that's part of the url in some chapters
 
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
@@ -40,12 +41,13 @@ print(argTest)
 #
 #
 
+
 # ? ----------------- File/URL Reading -----------------
 
 
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
-    # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters
+    # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
     if data['books'][bookTitle]['chapter'] < 3:
         bookUrl = site + str(data['books'][bookTitle]['chapter']) + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
