@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 # ? Must keep track of which chapter it is up to (use JSON file?), so as to only add new chapters to the offline file, and not duplicate already read and written chapters.
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
 # TODO might have to write something to automate the chapter names if that's part of the url in some chapters
+# TODO sort the library JSON file books alphabetically
 
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
