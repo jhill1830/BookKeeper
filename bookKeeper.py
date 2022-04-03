@@ -116,6 +116,20 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
                 continue
         file.write('\n'*2)
 
+
+'''
+Use the os.chdir() function.
+
+>>> import os
+>>> os.getcwd()
+'/home/username'
+>>> os.chdir(r'/home/username/Downloads')
+>>> os.getcwd()
+'/home/username/Downloads'
+
+You can get the current working directory using the os.getcwd function. The os.chdir function changes the current working directory to some other directory that you specify. (one which contains your file) and then you can open the file using a normal open(fileName, 'r') call.
+'''
+
 #
 #
 #
