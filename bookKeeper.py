@@ -45,7 +45,8 @@ print(argTest)
 
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
-    if data['books'][bookTitle]['chapter'] < 10:
+    # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist
+    if data['books'][bookTitle]['chapter'] < 3:
         bookUrl = site + str(data['books'][bookTitle]['chapter']) + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
@@ -81,13 +82,13 @@ def scrub(site, bookfile):  # scrubbing function
 
     else:
         return
+
     # IF book exists and no new chapter to write: RETURN/close program
 
     # IF book exists and new chapter to write:
 
     # ELSE: return/close program if something unnexpected happens
 
-    #scrub(site, bookfile)
 #
 #
 #
@@ -105,14 +106,15 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
     with open(bookfile, 'a') as file:
-        try:
-            file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
-            for tags in tag:           # iterate line by line through site
+
+        file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
+        for tags in tag:           # iterate line by line through site
+            try:
                 line = tags.get_text()   # print only the text of the selected element
                 file.write(line + '\n'*2)  # write line to file and add newline
-            file.write('\n'*2)
-        except:  # Used to capture characters that can't be encoded.  EG katakana etc.
-            return
+            except:  # Used to capture characters that can't be encoded.  EG katakana etc.
+                continue
+        file.write('\n'*2)
 
 #
 #
