@@ -20,7 +20,7 @@ from bs4 import BeautifulSoup
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
 #       # Use shell argument to define url
-url = 'https://novelfull.com/reverend-insanity/chapter-'
+url = 'https://bestlightnovel.com/novel_888108451/chapter_'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
 testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
@@ -47,8 +47,8 @@ print(argTest)
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
-    if data['books'][bookTitle]['chapter'] < 3:
-        bookUrl = site + str(data['books'][bookTitle]['chapter']) + '.html'
+    if data['books'][bookTitle]['chapter'] <= 3:
+        bookUrl = site + str(data['books'][bookTitle]['chapter'])  # + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
         soup = BeautifulSoup(urlOpen, 'html.parser')
