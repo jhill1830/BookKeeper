@@ -5,6 +5,8 @@ import urllib.parse
 import urllib.error
 import json
 import sys
+import time
+import os
 from bs4 import BeautifulSoup
 
 # ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
@@ -27,12 +29,11 @@ testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
-# Use shell argument to define the book.  Potentially use this argument for both bookTitle and bookFile
-bookTitle = sys.argv[1]
-bookFile = bookTitle + '.txt'   # Use shell argument to define book file to write to
+bookTitle = sys.argv[1]     # Use shell argument 1
+bookFile = bookTitle + '.txt'
 libraryJson = 'library.json'
-argTest = sys.argv[1]
-print(argTest)
+chaptersNum = sys.argv[2]   # Use shell argument 2
+print(bookTitle)
 #
 #
 #
@@ -48,7 +49,7 @@ print(argTest)
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
-    if data['books'][bookTitle]['chapter'] <= 3:
+    if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         bookUrl = site + str(data['books'][bookTitle]['chapter'])  # + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
@@ -70,6 +71,7 @@ def scrub(site, bookfile):  # scrubbing function
                 print('Book Found')
                 writeBook(bookfile, pTags, libraryJson)
                 updateChapter(bookTitle, libraryJson)
+                time.sleep(2)
                 scrub(site, bookfile)
                 return
 
@@ -104,6 +106,8 @@ def scrub(site, bookfile):  # scrubbing function
 def writeBook(bookfile, tag, jsonFile):  # write to file function.
     data = json.load(open(jsonFile, 'r'))  # Load in json
     chapter = data['books'][bookTitle]['chapter']  # Read chapter data
+    os.getcwd()
+    os.chdir(r'\Users\James Hillman\Documents\Books')
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
     with open(bookfile, 'a') as file:
@@ -116,6 +120,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
             except:  # Used to capture characters that can't be encoded.  EG katakana etc.
                 continue
         file.write('\n'*2)
+    os.chdir(r'C:\Users\James Hillman\Documents\Personal Repos\BookKeeper')
 
 
 '''
