@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 # ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
 # TODO might have to write something to automate the chapter names if that's part of the url in some chapters
 # TODO sort the library JSON file books alphabetically
+# TODO potentially rewrite the manner in which it goes to next chapter by looking for an <a> tag that includes text "Next Chapter". If it does, then copy page and then click link to next page.  Stop the program if there is no "Next Chapter" <a> tag.
 
 # ? ----------------- INPUTS -----------------
 # ! variable 'url' below won't work as the website itself is blocking the request.  Figure out workaround, once a basic webscraper is working on sites that do allow it
@@ -32,7 +33,7 @@ testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
 bookTitle = sys.argv[1]     # Use shell argument 1
 bookFile = bookTitle + '.txt'
 libraryJson = 'library.json'
-chaptersNum = sys.argv[2]   # Use shell argument 2
+chaptersNum = sys.argv[2]   # Use shell argument 2. # of chapters to read up to
 print(bookTitle)
 #
 #
@@ -43,10 +44,12 @@ print(bookTitle)
 #
 #
 
+# ? ----------------- Send Request -----------------
 
-# ? ----------------- File/URL Reading -----------------
 
-def scrub(site, bookfile):  # scrubbing function
+# TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
+
+def sendReq(site):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
     # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
@@ -55,21 +58,30 @@ def scrub(site, bookfile):  # scrubbing function
         urlOpen = urlopen(req).read()
         soup = BeautifulSoup(urlOpen, 'html.parser')
         pTags = soup('p')  # finds only selected tags eg. 'h1'
+        return pTags
 
+# ? ----------------- File/URL Reading -----------------
+
+
+def scrub(site, bookfile):  # scrubbing function
+    data = json.load(open(libraryJson, 'r'))
+    if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
         # ### Return and finish executing program if there is nothing to update
 
-    # TODO write if statements for book existence etc
+        # TODO write if statements for book existence etc
 
-    # # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
+        # # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
+        # ? If edited to click next chapter button.  Needs to check if valid url, and implement program if next chapter exists, then recur. (if nextChapter: writeBook(), updateChapter(), scrub(), return. else: return)
 
         data = json.load(open(libraryJson, 'r'))
         try:
             # Check if book exists in library
-            # and data['books'][bookTitle] === currentChapter: NOTE: current chapter checked by url ending?
+            # and data['books'][bookTitle]['chapter'] === currentChapter: NOTE: current chapter checked by url ending?
+            # Since url is based off
             if data['books'][bookTitle]:
                 print('Book Found')
-                writeBook(bookfile, pTags, libraryJson)
+                writeBook(bookfile, sendReq(site), libraryJson)
                 updateChapter(bookTitle, libraryJson)
                 time.sleep(2)
                 scrub(site, bookfile)
@@ -78,7 +90,7 @@ def scrub(site, bookfile):  # scrubbing function
         except:
             # IF book !exist: writeBook, updateChapter, updateLibrary
             updateLibrary(bookTitle, libraryJson)
-            writeBook(bookfile, pTags, libraryJson)
+            writeBook(bookfile, sendReq(site), libraryJson)
             updateChapter(bookTitle, libraryJson)
             scrub(site, bookfile)
             return
