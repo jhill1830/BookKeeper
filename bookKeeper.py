@@ -203,4 +203,9 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
 
+# ? ----------------- SEND NOTIFICATION -----------------
+
+# Notification to send if a new chapter has been written
+
+
 scrub(url, bookFile)
