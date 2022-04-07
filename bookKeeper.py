@@ -48,6 +48,7 @@ print(bookTitle)
 
 
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
+# TODO Might need to change the sendRequest so that I can specify which tag to target in the args
 
 def sendReq(site):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
@@ -67,6 +68,7 @@ def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
+        # ? alternate. If <a>Next Chapter</a>: do stuff. Might need to use sendReq() to target <a> tag and only check for "Next Chapter"(if sendReq(site, 'a').getText() == 'Next Chapter': (will need to iterate through site due to multiple tags))
         # ### Return and finish executing program if there is nothing to update
 
         # TODO write if statements for book existence etc
@@ -172,6 +174,7 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
         json.dump(data, writeFile, indent=4)
 
     data = json.load(open(jsonFile, 'r'))
+
     print(data['books'][book]["chapter"])
     print("Updated " + book)
     return
@@ -205,7 +208,7 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 
 # ? ----------------- SEND NOTIFICATION -----------------
 
-# Notification to send if a new chapter has been written
+# Notification to send if a new chapter has been written(apps: pushbullet, twilio, myNotifier)
 
 
 scrub(url, bookFile)
