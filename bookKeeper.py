@@ -50,7 +50,7 @@ print(bookTitle)
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
 # TODO Might need to change the sendRequest so that I can specify which tag to target in the args
 
-def sendReq(site):  # sendRequest function to connect and parse url which returns desired tag
+def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
     # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
@@ -58,7 +58,7 @@ def sendReq(site):  # sendRequest function to connect and parse url which return
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
         soup = BeautifulSoup(urlOpen, 'html.parser')
-        pTags = soup('p')  # finds only selected tags eg. 'h1'
+        pTags = soup(tag)  # finds only selected tags eg. 'h1'
         return pTags
 
 # ? ----------------- File/URL Reading -----------------
@@ -83,7 +83,7 @@ def scrub(site, bookfile):  # scrubbing function
             # Since url is based off
             if data['books'][bookTitle]:
                 print('Book Found')
-                writeBook(bookfile, sendReq(site), libraryJson)
+                writeBook(bookfile, sendReq(site, 'p'), libraryJson)
                 updateChapter(bookTitle, libraryJson)
                 time.sleep(2)
                 scrub(site, bookfile)
@@ -92,7 +92,7 @@ def scrub(site, bookfile):  # scrubbing function
         except:
             # IF book !exist: writeBook, updateChapter, updateLibrary
             updateLibrary(bookTitle, libraryJson)
-            writeBook(bookfile, sendReq(site), libraryJson)
+            writeBook(bookfile, sendReq(site, 'p'), libraryJson)
             updateChapter(bookTitle, libraryJson)
             scrub(site, bookfile)
             return
