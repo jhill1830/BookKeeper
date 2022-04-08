@@ -206,9 +206,10 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 # ? ----------------- NEXT CHAPTER -----------------
 
 
-# NOTE: This will cause the last chapter in the book to not be written. # TODO: Might have to add if statement to check if it is the last chapter in the series.
-# NOTE: This might also be an issue as the book will always be a chapter behind the most recent if the site doesn't do preview pages for the upcoming, incompleted chapters
+# NOTE: This will cause the last chapter in the book to not be written. # TODO: Might have to add if statement to check if it is the last chapter in the series. Use specified chapter num.
+# NOTE: This might also be an issue as the book will always be a chapter behind the most recent if the site doesn't do preview pages for the upcoming, incompleted chapters. Potentially write the file writing and sjson updating into this function so it write the page before it returns false.  That way it still writes the last url(AKA final chapter in series), as well as the most recently updated chapter if it's not complete yet. NOTE: this will only be viable if there is no preview pages for the next chapter, cause otherwise it will update the chapter number in the json when it has only written the preview for that chapter. NOTE: maybe check for a "Prev Chapter" <a> tag, to at least validate that it's a proper novel chapter url and doesn't write rnadom stuff from a chapter that doesn't exist(Still a problem with preview chapters.  Maybe have an arg specifying if the site has previews or not)
 
+# Uses existence of <a> tag with 'Next Chapter' text, to check if there is a valid next chapter url to go to.
 def nextChap(site):
     aTag = sendReq(site, 'a')
     for tag in aTag:
@@ -218,6 +219,8 @@ def nextChap(site):
                 return True
         except:
             continue
+    # if yes preview: just return false
+    # if no preview and if "Prev Chapter" <a> tag: write current page, then return false
     print("No New Chapter")
     return False
 
