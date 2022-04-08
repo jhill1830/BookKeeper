@@ -76,41 +76,36 @@ def sendReq(site, tag):  # sendRequest function to connect and parse url which r
 
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
+    # If up to date with specified chapter number
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
-        # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
-        # ? alternate. If <a>Next Chapter</a>: do stuff. Might need to use sendReq() to target <a> tag and only check for "Next Chapter"(if sendReq(site, 'a').getText() == 'Next Chapter': (will need to iterate through site due to multiple tags)) Write as seperate function?
-        # ### Return and finish executing program if there is nothing to update
+        # IF book exists and no new chapter to write: RETURN/close program
+        if nextChap(site):
+            # TODO write if statements for book existence etc
 
-        # TODO write if statements for book existence etc
+            # # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
 
-        # # Could potentially use scrub as a recursive function where it increments the url number until it somes up with a blank site/placeholder site. eg replace the chapter number in url
-        # ? If edited to click next chapter button.  Needs to check if valid url, and implement program if next chapter exists, then recur. (if nextChapter: writeBook(), updateChapter(), scrub(), return. else: return)
+            data = json.load(open(libraryJson, 'r'))
+            try:
+                # IF book exists and new chapter to write:
+                if data['books'][bookTitle]:
+                    print('Book Found')
+                    writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+                    updateChapter(bookTitle, libraryJson)
+                    time.sleep(1)
+                    scrub(site, bookfile)
+                    return
 
-        data = json.load(open(libraryJson, 'r'))
-        try:
-            # Check if book exists in library
-            if data['books'][bookTitle]:
-                print('Book Found')
+            except:
+                # IF book !exist: writeBook, updateChapter, updateLibrary
+                updateLibrary(bookTitle, libraryJson)
                 writeBook(bookfile, sendReq(site, 'p'), libraryJson)
                 updateChapter(bookTitle, libraryJson)
-                time.sleep(2)
                 scrub(site, bookfile)
                 return
 
-        except:
-            # IF book !exist: writeBook, updateChapter, updateLibrary
-            updateLibrary(bookTitle, libraryJson)
-            writeBook(bookfile, sendReq(site, 'p'), libraryJson)
-            updateChapter(bookTitle, libraryJson)
-            scrub(site, bookfile)
-            return
-
-    else:
+    else:   # Return and finish executing program if there is nothing to update
+        print("Up to date with specified chapters")
         return
-
-    # IF book exists and no new chapter to write: RETURN/close program
-
-    # IF book exists and new chapter to write:
 
     # ELSE: return/close program if something unnexpected happens
 
@@ -158,7 +153,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 def updateChapter(book, jsonFile):    # update file's chapter + 1
     # Load in external json file and create new object with it's data
     data = json.load(open(jsonFile, 'r'))
-    print(data['books'][book]['chapter'])
+    print('Chapter', data['books'][book]['chapter'])
     # Update targeted key's value in new 'data' json object
     data['books'][book]['chapter'] += 1  # Increment chapter by 1
 
@@ -169,7 +164,7 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
 
     data = json.load(open(jsonFile, 'r'))
 
-    print(data['books'][book]["chapter"])
+    # print(data['books'][book]["chapter"])
     print("Updated " + book)
     return
 
@@ -240,6 +235,4 @@ def nextChap(site):
 # Notification to send if a new chapter has been written(apps: pushbullet, twilio, myNotifier)
 
 
-#scrub(url, bookFile)
-if nextChap(testUrl):
-    print('True')
+scrub(url, bookFile)
