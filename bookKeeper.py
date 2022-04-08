@@ -48,7 +48,7 @@ print(bookTitle)
 
 
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
-# TODO Might need to change the sendRequest so that I can specify which tag to target in the args
+
 
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
