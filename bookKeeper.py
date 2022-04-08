@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from msilib import schema
+from pickle import TRUE
 from urllib.request import Request, urlopen
 import urllib.parse
 import urllib.error
@@ -26,7 +27,7 @@ from bs4 import BeautifulSoup
 #       # Use shell argument to define url
 url = 'https://bestlightnovel.com/novel_888108451/chapter_'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
-testUrl = 'https://www.webscrapingapi.com/python-web-scraping/'
+testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_20'
 
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
@@ -58,8 +59,17 @@ def sendReq(site, tag):  # sendRequest function to connect and parse url which r
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
         soup = BeautifulSoup(urlOpen, 'html.parser')
-        pTags = soup(tag)  # finds only selected tags eg. 'h1'
-        return pTags
+        tags = soup(tag)  # finds only selected tags eg. 'h1'
+        return tags
+
+#
+#
+#
+#
+#
+#
+#
+#
 
 # ? ----------------- File/URL Reading -----------------
 
@@ -68,7 +78,7 @@ def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         # ### Use if statement if chapter number on site is greater than in json file. Also check if it's a dummy page using number of characters in the sites p tag?
-        # ? alternate. If <a>Next Chapter</a>: do stuff. Might need to use sendReq() to target <a> tag and only check for "Next Chapter"(if sendReq(site, 'a').getText() == 'Next Chapter': (will need to iterate through site due to multiple tags))
+        # ? alternate. If <a>Next Chapter</a>: do stuff. Might need to use sendReq() to target <a> tag and only check for "Next Chapter"(if sendReq(site, 'a').getText() == 'Next Chapter': (will need to iterate through site due to multiple tags)) Write as seperate function?
         # ### Return and finish executing program if there is nothing to update
 
         # TODO write if statements for book existence etc
@@ -136,20 +146,6 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
         file.write('\n'*2)
     os.chdir(r'C:\Users\James Hillman\Documents\Personal Repos\BookKeeper')
 
-
-'''
-Use the os.chdir() function.
-
->>> import os
->>> os.getcwd()
-'/home/username'
->>> os.chdir(r'/home/username/Downloads')
->>> os.getcwd()
-'/home/username/Downloads'
-
-You can get the current working directory using the os.getcwd function. The os.chdir function changes the current working directory to some other directory that you specify. (one which contains your file) and then you can open the file using a normal open(fileName, 'r') call.
-'''
-
 #
 #
 #
@@ -203,12 +199,44 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
     print('Added New Book: ' + book)
     return
 
-
 # Might need to use a sleeper to prevent sites from auto blocking this if it's doing too many requests too quickly
+
+#
+#
+#
+#
+#
+#
+#
+#
+
+# ? ----------------- NEXT CHAPTER -----------------
+
+
+def nextChap(site):
+    aTag = sendReq(site, 'a')
+    for tag in aTag:
+        try:
+            line = tag.get_text()
+            if line == 'NEXT CHAPTER':
+                return True
+        except:
+            continue
+
+#
+#
+#
+#
+#
+#
+#
+#
 
 # ? ----------------- SEND NOTIFICATION -----------------
 
 # Notification to send if a new chapter has been written(apps: pushbullet, twilio, myNotifier)
 
 
-scrub(url, bookFile)
+#scrub(url, bookFile)
+if nextChap(testUrl):
+    print('True')
