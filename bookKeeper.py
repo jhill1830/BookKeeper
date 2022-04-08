@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 #       # Use shell argument to define url
 url = 'https://bestlightnovel.com/novel_888108451/chapter_'
 # testUrl = 'https://beautiful-soup-4.readthedocs.io/en/latest/#making-the-soup'
-testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_20'
+testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_2334'
 
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
@@ -89,8 +89,6 @@ def scrub(site, bookfile):  # scrubbing function
         data = json.load(open(libraryJson, 'r'))
         try:
             # Check if book exists in library
-            # and data['books'][bookTitle]['chapter'] === currentChapter: NOTE: current chapter checked by url ending?
-            # Since url is based off
             if data['books'][bookTitle]:
                 print('Book Found')
                 writeBook(bookfile, sendReq(site, 'p'), libraryJson)
@@ -213,6 +211,9 @@ def updateLibrary(book, jsonFile):  # Dunno if necessary. Might use a book list 
 # ? ----------------- NEXT CHAPTER -----------------
 
 
+# NOTE: This will cause the last chapter in the book to not be written. Might have to add if statement to check if it is the last chapter in the series.
+# NOTE: This might also be an issue as the book will always be a chapter behind the most recent if the site doesn't do preview pages for the upcoming, incompleted chapters
+
 def nextChap(site):
     aTag = sendReq(site, 'a')
     for tag in aTag:
@@ -222,6 +223,8 @@ def nextChap(site):
                 return True
         except:
             continue
+    print("No New Chapter")
+    return False
 
 #
 #
