@@ -26,3 +26,19 @@ Use the os.chdir() function.
 
 You can get the current working directory using the os.getcwd function. The os.chdir function changes the current working directory to some other directory that you specify. (one which contains your file) and then you can open the file using a normal open(fileName, 'r') call.
 '''
+
+# ? Site scrubber, to write online novels to notepad/word/whatever for offline reading
+
+# ? It goes over each site page chapter and creates new chapters, and continues to next webpage(aka next chapter) until there're no more chapters
+
+# ? Maybe add an update feature if the book isn't finished, so it captures new chapters and send a notification when a new chapter is out and written
+
+# ? Potentially, also have it work for graphic novels to save the pictures
+
+# ? Could have a shell script that runs the program each day/week, with arguments that define the book and/or website
+
+# ? Maybe choose which file to write to using the arguments in the shell script
+
+# ? Must keep track of which chapter it is up to (use JSON file?), so as to only add new chapters to the offline file, and not duplicate already read and written chapters.
+
+# ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
