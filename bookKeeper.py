@@ -10,9 +10,8 @@ import os
 from bs4 import BeautifulSoup
 
 # ? Maybe add an update feature if the book isn't finished, so it captures new chapters and send a notification when a new chapter is out and written
-# ? Potentially, also have it work for graphic novels to save the pictures
 # ? Could have a shell script that runs the program each day/week, with arguments that define the book and/or website
-# ? Some way of roughly evaluating how big the file will be once the program has file has been written. (Prompt user?) Potentially no as this may get in the way of automating in the shell script
+# ? Some way of pre-emptively estimating how big the filesize will be once the file has been written.
 # TODO sort the library JSON file books alphabetically. QoL
 
 # ? ----------------- INPUTS -----------------
@@ -20,7 +19,6 @@ from bs4 import BeautifulSoup
 #       # NOTE Could use shell argument to define url
 url = 'https://bestlightnovel.com/novel_888108451/chapter_'
 # testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_2334'
-
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 bookTitle = sys.argv[1]     # Use shell argument 1
@@ -44,10 +42,9 @@ print(bookTitle)
 # ? ----------------- Send Request -----------------
 
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
-
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
-    # TODO change the recursion state so that it ends when it has reached the most recent chapter. Potentially when it tries to load a site that doesn't exist. EQ try: load page. except: close program.  Might have to search page text and if '#404' shows, then stop program. Otherwise, might just have to specify the number of chapters.
+
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         bookUrl = site + str(data['books'][bookTitle]['chapter'])  # + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
@@ -66,10 +63,9 @@ def sendReq(site, tag):  # sendRequest function to connect and parse url which r
 def scrub(site, bookfile):  # scrubbing function
     data = json.load(open(libraryJson, 'r'))
     try:
-        # if book exists and isn't up to specified chapter.  Will error if book doesn't exist going to the except statement
+        # if book exists and isn't up to specified chapter.  Will error if book doesn't exist, going to the except statement
         if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
             if nextChap(site, bookfile):
-                # TODO write if statements for book existence etc
 
                 print('Book Found')
                 writeBook(bookfile, sendReq(site, 'p'), libraryJson)
@@ -165,7 +161,9 @@ def updateLibrary(book, jsonFile):  # Appends new book entry into library json
 # ? ----------------- NEXT CHAPTER -----------------
 
 # NOTE: This will cause the last chapter in the book to not be written. # TODO: Might have to add if statement to check if it is the last chapter in the series. Use specified chapter num.
-# NOTE: This might also be an issue as the book will always be a chapter behind the most recent if the site doesn't do preview pages for the upcoming, incompleted chapters. Potentially write the file writing and json updating into this function so it write the page before it returns false.  That way it still writes the last url(AKA final chapter in series), as well as the most recently updated chapter if it's not complete yet. NOTE: this will only be viable if there is no preview pages for the next chapter, cause otherwise it will update the chapter number in the json when it has only written the preview for that chapter. NOTE: maybe check for a "Prev Chapter" <a> tag, to at least validate that it's a proper novel chapter url and doesn't write rnadom stuff from a chapter that doesn't exist(Still a problem with preview chapters.  Maybe have an arg specifying if the site has previews or not)
+# NOTE: This might also be an issue as the book will always be a chapter behind the most recent if the site doesn't do preview pages for the upcoming, incompleted chapters. Potentially write the file writing and json updating into this function so it write the page before it returns false.  That way it still writes the last url(AKA final chapter in series), as well as the most recently updated chapter if it's not complete yet. NOTE: this will only be viable if there is no preview pages for the next chapter, cause otherwise it will update the chapter number in the json when it has only written the preview for that chapter.
+
+# TODO alter the <a> tag text so that it is consistent uppercase or lowercase
 
 # Uses existence of <a> tag with 'Next Chapter' text, to check if there is a valid next chapter url to go to.
 def nextChap(site, bookfile):
@@ -205,7 +203,6 @@ def nextChap(site, bookfile):
         print("No New Chapter")
         return False
 
-
 #
 #
 #
@@ -214,6 +211,5 @@ def nextChap(site, bookfile):
 # ? ----------------- SEND NOTIFICATION -----------------
 
 # Notification to send if a new chapter has been written(apps: pushbullet, twilio, myNotifier)
-
 
 scrub(url, bookFile)
