@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 # ? Could have a shell script that runs the program each day/week, with arguments that define the book and/or website
 # ? Some way of pre-emptively estimating how big the filesize will be once the file has been written.
 # TODO sort the library JSON file books alphabetically. QoL
+# TODO could potentially just email the new chapter to me when it is written, so I don't have to look it up
 
 # ? ----------------- INPUTS -----------------
 
