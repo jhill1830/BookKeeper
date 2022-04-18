@@ -8,7 +8,7 @@ Cause I found it annoying to read each chapter on seperate webpages. Especially 
 
 ## Stack
 
-- [Python] (https://www.python.org/) - Powerful, easy to learn programming language.
+- [Python](https://www.python.org/) - Powerful, easy to learn programming language.
 - JSON - used as an API for tracking chapter updates
 
 ---
