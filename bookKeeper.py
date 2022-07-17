@@ -18,7 +18,8 @@ from bs4 import BeautifulSoup
 # ? ----------------- INPUTS -----------------
 
 #       # NOTE Could use shell argument to define url
-url = 'https://bestlightnovel.com/novel_888108451/chapter_'
+# url = 'https://bestlightnovel.com/novel_888108451/chapter_' reverand insanity
+url = 'https://bestlightnovel.com/novel_888102798/chapter_'
 # testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_2334'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
