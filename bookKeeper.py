@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 # TODO could potentially just email the new chapter to me when it is written, so I don't have to look it up
 # TODO add a more flexible default file saving system.  Have the pathways in the JSON?
 # TODO prompt for url to use if there's no book yet/no url in the library.json
+# TODO change the way it updates the book to use the URL in the JSON rather than the variable defined just below in the inputs
 
 # ? ----------------- INPUTS -----------------
 
