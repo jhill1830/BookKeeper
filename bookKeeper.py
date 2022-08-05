@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from msilib import schema
+
 from urllib.request import Request, urlopen
 import urllib.parse
 import urllib.error
@@ -14,6 +14,8 @@ from bs4 import BeautifulSoup
 # ? Some way of pre-emptively estimating how big the filesize will be once the file has been written.
 # TODO sort the library JSON file books alphabetically. QoL
 # TODO could potentially just email the new chapter to me when it is written, so I don't have to look it up
+# TODO add a more flexible default file saving system.  Have the pathways in the JSON?
+# TODO prompt for url to use if there's no book yet/no url in the library.json
 
 # ? ----------------- INPUTS -----------------
 
@@ -99,7 +101,15 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
     data = json.load(open(jsonFile, 'r'))  # Load in json
     chapter = data['books'][bookTitle]['chapter']  # Read chapter data
     os.getcwd()
-    os.chdir(r'\Users\James Hillman\Documents\Books')
+    parent_dir = os.getcwd()
+    new_dir = "Books"
+    path = os.path.join(parent_dir, new_dir)
+    try:
+        os.chdir(path)
+
+    except:
+        os.mkdir(path)
+        os.chdir(path)
 
     # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
     with open(bookfile, 'a') as file:
@@ -112,7 +122,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
             except:  # Used to capture characters that can't be encoded.  EG katakana etc.
                 continue
         file.write('\n'*2)
-    os.chdir(r'C:\Users\James Hillman\Documents\Personal Repos\BookKeeper')
+    os.chdir(parent_dir)
 
 #
 #
