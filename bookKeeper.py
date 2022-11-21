@@ -40,10 +40,12 @@ print(bookTitle)
 #
 #
 
-
+# test
 # ? ----------------- Send Request -----------------
 
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
+
+
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
     data = json.load(open(libraryJson, 'r'))
 
