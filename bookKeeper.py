@@ -27,6 +27,9 @@ bookTitle = sys.argv[1]     # Use shell argument 1
 bookFile = bookTitle + '.epub'
 libraryJson = 'library.json'
 
+# Load in external json file and create new object with it's data
+data = json.load(open(libraryJson, 'r'))
+
 chaptersNum = sys.argv[2]   # Use shell argument 2. # of chapters to read up to
 
 # Check for specificity of preview chapter in shell statement
@@ -45,9 +48,7 @@ print(bookTitle)
 
 
 def checkBookUrl(book):
-    data = json.load(open(libraryJson, 'r'))
     global url
-
     try:
         if data['books'][book]:
             url = data['books'][book]['url']
@@ -56,14 +57,13 @@ def checkBookUrl(book):
 
 
 checkBookUrl(bookTitle)
-# test
+
 # ? ----------------- Send Request -----------------
 
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
 
 
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
-    data = json.load(open(libraryJson, 'r'))
 
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
         bookUrl = site + str(data['books'][bookTitle]['chapter'])  # + '.html'
@@ -81,7 +81,8 @@ def sendReq(site, tag):  # sendRequest function to connect and parse url which r
 # ? ----------------- File/URL Reading -----------------
 
 def scrub(site, bookfile):  # scrubbing function
-    data = json.load(open(libraryJson, 'r'))
+
+    parent_dir = os.getcwd()
     try:
         # if book exists and isn't up to specified chapter.  Will error if book doesn't exist, going to the except statement
         if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
@@ -103,7 +104,7 @@ def scrub(site, bookfile):  # scrubbing function
 
     except:
         # IF book !exist: updateLibrary, writeBook, updateChapter
-        parent_dir = os.getcwd()
+
         os.chdir(parent_dir)
         updateLibrary(bookTitle, libraryJson, parent_dir)
 
@@ -155,7 +156,7 @@ def scrub(site, bookfile):  # scrubbing function
 # ? ----------------- WRITE NEW EPUB (epub)-----------------
 
 def writeEpub(book, tag, jsonFile):  # write to file function.
-    data = json.load(open(jsonFile, 'r'))  # Load in json
+    # Load in json
     chapter = data['books'][bookTitle]['chapter']  # Read chapter data
     os.getcwd()
     parent_dir = os.getcwd()
@@ -180,37 +181,40 @@ def writeEpub(book, tag, jsonFile):  # write to file function.
         except:
             continue
 
-    try:
-        if data['books'][bookTitle]:
-            addToEpub(bookTitle, lines)
+    addToEpub(bookTitle, lines)
 
-    except:
-        chapTitle = 'Chapter ' + str(chapter)
-        createChap = epub.EpubHtml(
-            title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
-        createChap.content = u'' + lines
-        epubBook.add_item(createChap)
+# ? ----------------- CREATE EPUB-----------------
 
-        # Table of Contents
-        epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-                        bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
 
-        # define CSS style
-        style = 'BODY {color: white;}'
-        nav_css = epub.EpubItem(
-            uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+def createEpub(book)
 
-        # add CSS file
-        epubBook.add_item(nav_css)
-
-        epubBook.add_item(epub.EpubNcx())
-        epubBook.add_item(epub.EpubNav())
-
-        # basic spine
-        epubBook.spine = ['nav', createChap]
-
-        # write to file
-        epub.write_epub(bookTitle + '.epub', epubBook, {})
+            chapTitle = 'Chapter ' + str(chapter)
+    createChap = epub.EpubHtml(
+    title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
+            createChap.content = u'' + lines
+    epubBook.add_item(createChap)
+    
+    Table of Contents
+    epubBook.toc = (epub.Link(chapTitle + '.xhtml',
+    bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
+    
+    define CSS style
+            style = 'BODY {color: white;}'
+    nav_css = epub.EpubItem(
+    uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+    
+    add CSS file
+    epubBook.add_item(nav_css)
+    
+    epubBook.add_item(epub.EpubNcx())
+    epubBook.add_item(epub.EpubNav())
+    
+    basic spine
+            epubBook.spine = ['nav', createChap]
+    
+    write to file
+            epub.write_epub(bookTitle + '.epub', epubBook, {})
+    rint("No booky")
 
     os.chdir(parent_dir)
 
@@ -221,7 +225,7 @@ def writeEpub(book, tag, jsonFile):  # write to file function.
 
 
 def addToEpub(book, lines):
-    data = json.load(open(libraryJson, 'r'))
+
     bookEpub = epub.read_epub(bookFile)
     chapter = data['books'][book]['chapter']
     chapTitle = 'Chapter ' + str(chapter)
@@ -229,12 +233,14 @@ def addToEpub(book, lines):
         title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
     addChap.content = u'' + lines
     bookEpub.add_item(addChap)
+    bookEpub.spine.extend((addChap,))
+    bookEpub.toc.append(addChap)
+    epub.write_epub(bookTitle + '.epub', bookEpub, {})
     # ? ----------------- UPDATE CHAPTER -----------------
 
 
 def updateChapter(book, jsonFile):    # update file's chapter + 1
-    # Load in external json file and create new object with it's data
-    data = json.load(open(jsonFile, 'r'))
+
     print('Chapter', data['books'][book]['chapter'])
     # Update targeted key's value in new 'data' json object
     data['books'][book]['chapter'] += 1  # Increment chapter by 1
@@ -243,8 +249,6 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
     with open(jsonFile, 'w') as writeFile:
         # .dump turn the data object into a string, as it can't write an object into the file. indent=4 causes it to have proper formatting in the output file
         json.dump(data, writeFile, indent=4)
-
-    data = json.load(open(jsonFile, 'r'))
 
     print("Updated " + book)
     return
@@ -260,7 +264,7 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
 def updateLibrary(book, jsonFile, dir):  # Appends new book entry into library json
     os.chdir(dir)
     print(str(dir))
-    data = json.load(open(jsonFile, 'r'))
+
     data['books'][book] = {'title': book, 'chapter': 1, 'url': url}
 
     with open(jsonFile, 'r+') as updateFile:
@@ -293,10 +297,9 @@ def nextChap(site, bookTitle):
 
     # if yes preview: just return false
     if previewChap:
-        data = json.load(open(libraryJson, 'r'))
         # write the last chapter if it's the last one specified
         if data['books'][bookTitle]['chapter'] == int(chaptersNum):
-            writeBook(bookTitle, sendReq(site, 'p'), libraryJson)
+            writeEpub(bookTitle, sendReq(site, 'p'), libraryJson)
             updateChapter(bookTitle, libraryJson)
             print('Last Chapter')
             return False
@@ -309,7 +312,7 @@ def nextChap(site, bookTitle):
             try:
                 line = tag.get_text()
                 if line == 'PREV CHAPTER':
-                    writeBook(bookTitle, sendReq(site, 'p'), libraryJson)
+                    writeEpub(bookTitle, sendReq(site, 'p'), libraryJson)
                     updateChapter(bookTitle, libraryJson)
                     print('Most Recent Chapter')
                     return False
