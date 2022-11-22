@@ -91,7 +91,7 @@ def scrub(site, bookfile):  # scrubbing function
                 print('Book Found')
 
                 # ! change to UPDATE EPUB function
-                writeEpub(bookfile, sendReq(site, 'p'), libraryJson)
+                writeEpub(bookTitle, sendReq(site, 'p'), libraryJson)
 
                 updateChapter(bookTitle, libraryJson)
                 time.sleep(1)
@@ -178,8 +178,10 @@ def writeEpub(book, tag, jsonFile):  # write to file function.
         except:
             continue
 
-    #createEpub(bookTitle, lines)
-    addToEpub(bookTitle, lines)
+    if data['books'][bookTitle] and data['books'][bookTitle]['chapter'] > 1:
+        addToEpub(bookTitle, lines)
+    else:
+        createEpub(bookTitle, lines)
 
     os.chdir(parent_dir)
 
