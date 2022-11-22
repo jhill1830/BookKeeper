@@ -37,11 +37,6 @@ epubBook.set_title(bookTitle)
 epubBook.set_language('en')
 chaptersNum = sys.argv[2]   # Use shell argument 2. # of chapters to read up to
 
-# add default NCX and Nav file
-epubBook.add_item(epub.EpubNcx())
-epubBook.add_item(epub.EpubNav())
-
-
 # Check for specificity of preview chapter in shell statement
 try:
     previewChap = sys.argv[3]
@@ -86,7 +81,10 @@ def scrub(site, bookfile):  # scrubbing function
             if nextChap(site, bookfile):
 
                 print('Book Found')
+
+                # ! change to CREATE NEW EPUB function
                 writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+
                 updateChapter(bookTitle, libraryJson)
                 time.sleep(1)
                 scrub(site, bookfile)
@@ -98,8 +96,13 @@ def scrub(site, bookfile):  # scrubbing function
 
     except:
         # IF book !exist: updateLibrary, writeBook, updateChapter
-        updateLibrary(bookTitle, libraryJson)
+        parent_dir = os.getcwd()
+        os.chdir(parent_dir)
+        updateLibrary(bookTitle, libraryJson, parent_dir)
+
+        # ! change to UDPATE EPUB function
         writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+
         updateChapter(bookTitle, libraryJson)
         scrub(site, bookfile)
         return
@@ -161,20 +164,27 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     for tags in tag:
         try:
-            line = tags.get_text()
-            lines = lines + line
-            print(line)
+            line = '<p>' + tags.get_text() + '</p>'
+            lines = lines + line + '\n'
+            # print(line)
         except:
             continue
+
+
+# ? ----------------- CREATE NEW EPUB-----------------
+
+    # TODO make this a function that creates a new epub book if it doesn't exist already.  Should be able to use preexisting new book if statement in scrub function
 
     # Create epub book
     chapTitle = 'Chapter ' + str(chapter)
     createChap = epub.EpubHtml(
         title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
-    createChap.content = u'<p>' + lines + '</p>'
+    createChap.content = u'' + lines
     epubBook.add_item(createChap)
+
+    # Table of Contents
     epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-                    chapTitle, chapTitle), (createChap, ))
+                    bookTitle, bookTitle), (epub.Section('testSec'), (createChap, )))
 
     # define CSS style
     style = 'BODY {color: white;}'
@@ -192,6 +202,10 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     os.chdir(parent_dir)
 
+
+# ? ----------------- UPDATE EPUB-----------------
+
+    # TODO create function that appends new chapter and TOC to existing epub (https://github.com/aerkalov/ebooklib/issues/217)
 
 # ? ----------------- UPDATE CHAPTER -----------------
 
@@ -220,8 +234,9 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
 # ? ----------------- UPDATE LIBRARY -----------------
 
 # BUG: this functions will update the json file in the wrong format if used on a pre-existing key/entry.  But works properly if used to create a new entry
-def updateLibrary(book, jsonFile):  # Appends new book entry into library json
-    os.chdir(parent_dir)
+def updateLibrary(book, jsonFile, dir):  # Appends new book entry into library json
+    os.chdir(dir)
+    print(str(dir))
     data = json.load(open(jsonFile, 'r'))
     data['books'][book] = {'title': book, 'chapter': 1, 'url': url}
 
