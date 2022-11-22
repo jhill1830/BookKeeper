@@ -203,7 +203,7 @@ def createEpub(book, lines):
 
     # Table of Contents
     epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-                              bookTitle, bookTitle), (epub.Section("Chapters: "), (createChap,)))
+                              bookTitle, bookTitle), (epub.Section("Chapters 1"), (createChap,)))
 
     # define CSS style
     style = 'BODY {color: white;}'
