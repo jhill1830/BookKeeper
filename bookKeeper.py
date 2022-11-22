@@ -7,6 +7,7 @@ import json
 import sys
 import time
 import os
+import pypub
 from bs4 import BeautifulSoup
 
 # ! import epub to export book as ePub file
