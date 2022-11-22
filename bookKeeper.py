@@ -62,6 +62,8 @@ checkBookUrl(bookTitle)
 # TODO maybe rewrite the sendRequest function to check for valid url address/ address that has a proper book in it
 
 
+# NOTE: some chapters' html isn't properly formatted on the site and has empty p tags. Returning empty chapters
+
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
 
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
