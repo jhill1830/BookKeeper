@@ -11,7 +11,7 @@ import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
 
-# ! import epub to export book as ePub file
+# ! issues with library.json not being recognised intermittently
 # ? Maybe add an update feature if the book isn't finished, so it captures new chapters and send a notification when a new chapter is out and written
 # ? Could have a shell script that runs the program each day/week, with arguments that define the book and/or website
 # ? Some way of pre-emptively estimating how big the filesize will be once the file has been written.
