@@ -25,8 +25,9 @@ from bs4 import BeautifulSoup
 
 #       # NOTE Could use shell argument to define url
 # url = 'https://bestlightnovel.com/novel_888108451/chapter_' reverand insanity
-url = 'https://bestlightnovel.com/novel_888102798/chapter_'
+# url = 'https://bestlightnovel.com/novel_888102798/chapter_'
 # testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_2334'
+
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 bookTitle = sys.argv[1]     # Use shell argument 1
@@ -45,10 +46,25 @@ except:
 
 print(bookTitle)
 
+
 #
 #
 #
 
+# ? ----------------- Check for book -----------------
+
+def checkBook(book):
+    data = json.load(open(libraryJson, 'r'))
+    global url
+
+    try:
+        if data['books'][bookTitle]:
+            url = data['books'][bookTitle]['url']
+    except:
+        url = input("Enter url: ")
+
+
+checkBook(bookTitle)
 # test
 # ? ----------------- Send Request -----------------
 
@@ -184,7 +200,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     # Table of Contents
     epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-                    bookTitle, bookTitle), (epub.Section('testSec'), (createChap, )))
+                    bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
 
     # define CSS style
     style = 'BODY {color: white;}'
@@ -193,6 +209,9 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 
     # add CSS file
     epubBook.add_item(nav_css)
+
+    epubBook.add_item(epub.EpubNcx())
+    epubBook.add_item(epub.EpubNav())
 
     # basic spine
     epubBook.spine = ['nav', createChap]
@@ -206,6 +225,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
 # ? ----------------- UPDATE EPUB-----------------
 
     # TODO create function that appends new chapter and TOC to existing epub (https://github.com/aerkalov/ebooklib/issues/217)
+    # read existing epub file and append/extend to it.  Might need to remove and add the EpubNcx and EpubNav items
 
 # ? ----------------- UPDATE CHAPTER -----------------
 
