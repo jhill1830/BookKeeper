@@ -7,7 +7,8 @@ import json
 import sys
 import time
 import os
-import pypub
+import ebooklib
+from ebooklib import epub
 from bs4 import BeautifulSoup
 
 # ! import epub to export book as ePub file
@@ -29,9 +30,17 @@ url = 'https://bestlightnovel.com/novel_888102798/chapter_'
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 bookTitle = sys.argv[1]     # Use shell argument 1
-bookFile = bookTitle + '.txt'
+bookFile = bookTitle + '.epub'
 libraryJson = 'library.json'
+epubBook = epub.EpubBook()
+epubBook.set_title(bookTitle)
+epubBook.set_language('en')
 chaptersNum = sys.argv[2]   # Use shell argument 2. # of chapters to read up to
+
+# add default NCX and Nav file
+epubBook.add_item(epub.EpubNcx())
+epubBook.add_item(epub.EpubNav())
+
 
 # Check for specificity of preview chapter in shell statement
 try:
@@ -100,7 +109,40 @@ def scrub(site, bookfile):  # scrubbing function
 #
 
 
-# ? ----------------- WRITE TO FILE -----------------
+# ? ----------------- WRITE TO FILE (txt)-----------------
+
+# def writeBook(bookfile, tag, jsonFile):  # write to file function.
+# data = json.load(open(jsonFile, 'r'))  # Load in json
+# chapter = data['books'][bookTitle]['chapter']  # Read chapter data
+# os.getcwd()
+# parent_dir = os.getcwd()
+# new_dir = "Books"
+# path = os.path.join(parent_dir, new_dir)
+# try:
+# os.chdir(path)
+##
+# except:
+# os.mkdir(path)
+# os.chdir(path)
+##
+# open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
+# with open(bookfile, 'a') as file:
+##
+# file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
+# for tags in tag:           # iterate line by line through site
+# try:
+# line = tags.get_text()   # print only the text of the selected element
+# file.write(line + '\n'*2)  # write line to file and add newline
+# except:  # Used to capture characters that can't be encoded.  EG katakana etc.
+# continue
+# file.write('\n'*2)
+# os.chdir(parent_dir)
+
+#
+#
+#
+
+# ? ----------------- WRITE TO FILE (epub)-----------------
 
 def writeBook(bookfile, tag, jsonFile):  # write to file function.
     data = json.load(open(jsonFile, 'r'))  # Load in json
@@ -109,6 +151,7 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
     parent_dir = os.getcwd()
     new_dir = "Books"
     path = os.path.join(parent_dir, new_dir)
+    lines = ''
     try:
         os.chdir(path)
 
@@ -116,22 +159,38 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
         os.mkdir(path)
         os.chdir(path)
 
-    # open file to write to.  The second param: 'r' -read, 'w' -write, 'a' -append
-    with open(bookfile, 'a') as file:
+    for tags in tag:
+        try:
+            line = tags.get_text()
+            lines = lines + line
+            print(line)
+        except:
+            continue
 
-        file.write('\t' + 'CHAPTER ' + str(chapter) + '\n'*2)
-        for tags in tag:           # iterate line by line through site
-            try:
-                line = tags.get_text()   # print only the text of the selected element
-                file.write(line + '\n'*2)  # write line to file and add newline
-            except:  # Used to capture characters that can't be encoded.  EG katakana etc.
-                continue
-        file.write('\n'*2)
+    # Create epub book
+    chapTitle = 'Chapter ' + str(chapter)
+    createChap = epub.EpubHtml(
+        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
+    createChap.content = u'<p>' + lines + '</p>'
+    epubBook.add_item(createChap)
+    epubBook.toc = (epub.Link(chapTitle + '.xhtml',
+                    chapTitle, chapTitle), (createChap, ))
+
+    # define CSS style
+    style = 'BODY {color: white;}'
+    nav_css = epub.EpubItem(
+        uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+
+    # add CSS file
+    epubBook.add_item(nav_css)
+
+    # basic spine
+    epubBook.spine = ['nav', createChap]
+
+    # write to file
+    epub.write_epub(bookTitle + '.epub', epubBook, {})
+
     os.chdir(parent_dir)
-
-#
-#
-#
 
 
 # ? ----------------- UPDATE CHAPTER -----------------
@@ -162,6 +221,7 @@ def updateChapter(book, jsonFile):    # update file's chapter + 1
 
 # BUG: this functions will update the json file in the wrong format if used on a pre-existing key/entry.  But works properly if used to create a new entry
 def updateLibrary(book, jsonFile):  # Appends new book entry into library json
+    os.chdir(parent_dir)
     data = json.load(open(jsonFile, 'r'))
     data['books'][book] = {'title': book, 'chapter': 1, 'url': url}
 
