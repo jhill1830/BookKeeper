@@ -19,23 +19,14 @@ from bs4 import BeautifulSoup
 # TODO could potentially just email the new chapter to me when it is written, so I don't have to look it up
 # TODO add a more flexible default file saving system.  Have the pathways in the JSON?
 # TODO prompt for url to use if there's no book yet/no url in the library.json
-# TODO change the way it updates the book to use the URL in the JSON rather than the variable defined just below in the inputs
 
 # ? ----------------- INPUTS -----------------
-
-#       # NOTE Could use shell argument to define url
-# url = 'https://bestlightnovel.com/novel_888108451/chapter_' reverand insanity
-# url = 'https://bestlightnovel.com/novel_888102798/chapter_'
-# testUrl = 'https://bestlightnovel.com/novel_888108451/chapter_2334'
-
 
 # TODO Maybe figure out a way to dynamically change the file name based on the sites book.  (Use h1 tag? Use librabry.json file?)
 bookTitle = sys.argv[1]     # Use shell argument 1
 bookFile = bookTitle + '.epub'
 libraryJson = 'library.json'
-epubBook = epub.EpubBook()
-epubBook.set_title(bookTitle)
-epubBook.set_language('en')
+
 chaptersNum = sys.argv[2]   # Use shell argument 2. # of chapters to read up to
 
 # Check for specificity of preview chapter in shell statement
@@ -46,25 +37,25 @@ except:
 
 print(bookTitle)
 
-
 #
 #
 #
 
 # ? ----------------- Check for book -----------------
 
-def checkBook(book):
+
+def checkBookUrl(book):
     data = json.load(open(libraryJson, 'r'))
     global url
 
     try:
-        if data['books'][bookTitle]:
-            url = data['books'][bookTitle]['url']
+        if data['books'][book]:
+            url = data['books'][book]['url']
     except:
         url = input("Enter url: ")
 
 
-checkBook(bookTitle)
+checkBookUrl(bookTitle)
 # test
 # ? ----------------- Send Request -----------------
 
@@ -98,8 +89,8 @@ def scrub(site, bookfile):  # scrubbing function
 
                 print('Book Found')
 
-                # ! change to CREATE NEW EPUB function
-                writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+                # ! change to UPDATE EPUB function
+                writeEpub(bookfile, sendReq(site, 'p'), libraryJson)
 
                 updateChapter(bookTitle, libraryJson)
                 time.sleep(1)
@@ -116,8 +107,8 @@ def scrub(site, bookfile):  # scrubbing function
         os.chdir(parent_dir)
         updateLibrary(bookTitle, libraryJson, parent_dir)
 
-        # ! change to UDPATE EPUB function
-        writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+        # ! change to CREATE NEW EPUB function
+        writeEpub(bookfile, sendReq(site, 'p'), libraryJson)
 
         updateChapter(bookTitle, libraryJson)
         scrub(site, bookfile)
@@ -161,15 +152,18 @@ def scrub(site, bookfile):  # scrubbing function
 #
 #
 
-# ? ----------------- WRITE TO FILE (epub)-----------------
+# ? ----------------- WRITE NEW EPUB (epub)-----------------
 
-def writeBook(bookfile, tag, jsonFile):  # write to file function.
+def writeEpub(book, tag, jsonFile):  # write to file function.
     data = json.load(open(jsonFile, 'r'))  # Load in json
     chapter = data['books'][bookTitle]['chapter']  # Read chapter data
     os.getcwd()
     parent_dir = os.getcwd()
     new_dir = "Books"
     path = os.path.join(parent_dir, new_dir)
+    epubBook = epub.EpubBook()
+    epubBook.set_title(book)
+    epubBook.set_language('en')
     lines = ''
     try:
         os.chdir(path)
@@ -186,48 +180,57 @@ def writeBook(bookfile, tag, jsonFile):  # write to file function.
         except:
             continue
 
+    try:
+        if data['books'][bookTitle]:
+            addToEpub(bookTitle, lines)
 
-# ? ----------------- CREATE NEW EPUB-----------------
+    except:
+        chapTitle = 'Chapter ' + str(chapter)
+        createChap = epub.EpubHtml(
+            title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
+        createChap.content = u'' + lines
+        epubBook.add_item(createChap)
 
-    # TODO make this a function that creates a new epub book if it doesn't exist already.  Should be able to use preexisting new book if statement in scrub function
+        # Table of Contents
+        epubBook.toc = (epub.Link(chapTitle + '.xhtml',
+                        bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
 
-    # Create epub book
-    chapTitle = 'Chapter ' + str(chapter)
-    createChap = epub.EpubHtml(
-        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
-    createChap.content = u'' + lines
-    epubBook.add_item(createChap)
+        # define CSS style
+        style = 'BODY {color: white;}'
+        nav_css = epub.EpubItem(
+            uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
 
-    # Table of Contents
-    epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-                    bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
+        # add CSS file
+        epubBook.add_item(nav_css)
 
-    # define CSS style
-    style = 'BODY {color: white;}'
-    nav_css = epub.EpubItem(
-        uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+        epubBook.add_item(epub.EpubNcx())
+        epubBook.add_item(epub.EpubNav())
 
-    # add CSS file
-    epubBook.add_item(nav_css)
+        # basic spine
+        epubBook.spine = ['nav', createChap]
 
-    epubBook.add_item(epub.EpubNcx())
-    epubBook.add_item(epub.EpubNav())
-
-    # basic spine
-    epubBook.spine = ['nav', createChap]
-
-    # write to file
-    epub.write_epub(bookTitle + '.epub', epubBook, {})
+        # write to file
+        epub.write_epub(bookTitle + '.epub', epubBook, {})
 
     os.chdir(parent_dir)
-
 
 # ? ----------------- UPDATE EPUB-----------------
 
     # TODO create function that appends new chapter and TOC to existing epub (https://github.com/aerkalov/ebooklib/issues/217)
     # read existing epub file and append/extend to it.  Might need to remove and add the EpubNcx and EpubNav items
 
-# ? ----------------- UPDATE CHAPTER -----------------
+
+def addToEpub(book, lines):
+    data = json.load(open(libraryJson, 'r'))
+    bookEpub = epub.read_epub(bookFile)
+    chapter = data['books'][book]['chapter']
+    chapTitle = 'Chapter ' + str(chapter)
+    addChap = epub.EpubHtml(
+        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
+    addChap.content = u'' + lines
+    bookEpub.add_item(addChap)
+    # ? ----------------- UPDATE CHAPTER -----------------
+
 
 def updateChapter(book, jsonFile):    # update file's chapter + 1
     # Load in external json file and create new object with it's data
@@ -278,7 +281,7 @@ def updateLibrary(book, jsonFile, dir):  # Appends new book entry into library j
 # TODO alter the <a> tag text so that it is consistent uppercase or lowercase
 
 # Uses existence of <a> tag with 'Next Chapter' text, to check if there is a valid next chapter url to go to.
-def nextChap(site, bookfile):
+def nextChap(site, bookTitle):
     aTag = sendReq(site, 'a')
     for tag in aTag:
         try:
@@ -293,7 +296,7 @@ def nextChap(site, bookfile):
         data = json.load(open(libraryJson, 'r'))
         # write the last chapter if it's the last one specified
         if data['books'][bookTitle]['chapter'] == int(chaptersNum):
-            writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+            writeBook(bookTitle, sendReq(site, 'p'), libraryJson)
             updateChapter(bookTitle, libraryJson)
             print('Last Chapter')
             return False
@@ -306,7 +309,7 @@ def nextChap(site, bookfile):
             try:
                 line = tag.get_text()
                 if line == 'PREV CHAPTER':
-                    writeBook(bookfile, sendReq(site, 'p'), libraryJson)
+                    writeBook(bookTitle, sendReq(site, 'p'), libraryJson)
                     updateChapter(bookTitle, libraryJson)
                     print('Most Recent Chapter')
                     return False
