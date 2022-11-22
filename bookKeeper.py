@@ -157,14 +157,11 @@ def scrub(site, bookfile):  # scrubbing function
 
 def writeEpub(book, tag, jsonFile):  # write to file function.
     # Load in json
-    chapter = data['books'][bookTitle]['chapter']  # Read chapter data
     os.getcwd()
     parent_dir = os.getcwd()
     new_dir = "Books"
     path = os.path.join(parent_dir, new_dir)
-    epubBook = epub.EpubBook()
-    epubBook.set_title(book)
-    epubBook.set_language('en')
+
     lines = ''
     try:
         os.chdir(path)
@@ -181,42 +178,47 @@ def writeEpub(book, tag, jsonFile):  # write to file function.
         except:
             continue
 
+    #createEpub(bookTitle, lines)
     addToEpub(bookTitle, lines)
+
+    os.chdir(parent_dir)
 
 # ? ----------------- CREATE EPUB-----------------
 
 
-def createEpub(book)
+def createEpub(book, lines):
+    epubBook = epub.EpubBook()
+    epubBook.set_title(book)
+    epubBook.set_language('en')
 
-            chapTitle = 'Chapter ' + str(chapter)
+    chapter = data['books'][book]['chapter']  # Read chapter data
+    chapTitle = 'Chapter ' + str(chapter)
     createChap = epub.EpubHtml(
-    title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
-            createChap.content = u'' + lines
+        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en', uid=chapTitle)
+    createChap.content = u'' + lines
     epubBook.add_item(createChap)
-    
-    Table of Contents
+
+    # Table of Contents
     epubBook.toc = (epub.Link(chapTitle + '.xhtml',
-    bookTitle, bookTitle), (epub.Section('Chapters:'), (createChap, )))
-    
-    define CSS style
-            style = 'BODY {color: white;}'
+                              bookTitle, bookTitle), (epub.Section("Chapters: "), (createChap,)))
+
+    # define CSS style
+    style = 'BODY {color: white;}'
     nav_css = epub.EpubItem(
-    uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
-    
-    add CSS file
+        uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+
+    # add CSS file
     epubBook.add_item(nav_css)
-    
+
     epubBook.add_item(epub.EpubNcx())
     epubBook.add_item(epub.EpubNav())
-    
-    basic spine
-            epubBook.spine = ['nav', createChap]
-    
-    write to file
-            epub.write_epub(bookTitle + '.epub', epubBook, {})
-    rint("No booky")
 
-    os.chdir(parent_dir)
+    # basic spine
+    epubBook.spine = ['nav', createChap]
+
+    # write to file
+    epub.write_epub(bookTitle + '.epub', epubBook, {})
+
 
 # ? ----------------- UPDATE EPUB-----------------
 
@@ -230,11 +232,18 @@ def addToEpub(book, lines):
     chapter = data['books'][book]['chapter']
     chapTitle = 'Chapter ' + str(chapter)
     addChap = epub.EpubHtml(
-        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en')
+        title=chapTitle, file_name=chapTitle + '.xhtml', lang='en', uid=chapTitle)
     addChap.content = u'' + lines
     bookEpub.add_item(addChap)
     bookEpub.spine.extend((addChap,))
     bookEpub.toc.append(addChap)
+
+    bookEpub.items.remove(bookEpub.get_item_with_id('ncx'))
+    bookEpub.items.remove(bookEpub.get_item_with_id('nav'))
+
+    bookEpub.add_item(epub.EpubNcx())
+    bookEpub.add_item(epub.EpubNav())
+
     epub.write_epub(bookTitle + '.epub', bookEpub, {})
     # ? ----------------- UPDATE CHAPTER -----------------
 
