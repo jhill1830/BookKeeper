@@ -67,7 +67,7 @@ checkBookUrl(bookTitle)
 def sendReq(site, tag):  # sendRequest function to connect and parse url which returns desired tag
 
     if data['books'][bookTitle]['chapter'] <= int(chaptersNum):
-        bookUrl = site + str(data['books'][bookTitle]['chapter'])  # + '.html'
+        bookUrl = site + str(data['books'][bookTitle]['chapter']) + '.html'
         req = Request(bookUrl, headers={'User-Agent': 'Mozilla/5.0'})
         urlOpen = urlopen(req).read()
         soup = BeautifulSoup(urlOpen, 'html.parser')
@@ -91,11 +91,10 @@ def scrub(site, bookfile):  # scrubbing function
 
                 print('Book Found')
 
-                # ! change to UPDATE EPUB function
                 writeEpub(bookTitle, sendReq(site, 'p'), libraryJson)
 
                 updateChapter(bookTitle, libraryJson)
-                time.sleep(1)
+                time.sleep(0.7)
                 scrub(site, bookfile)
                 return
 
@@ -109,7 +108,6 @@ def scrub(site, bookfile):  # scrubbing function
         os.chdir(parent_dir)
         updateLibrary(bookTitle, libraryJson, parent_dir)
 
-        # ! change to CREATE NEW EPUB function
         writeEpub(bookfile, sendReq(site, 'p'), libraryJson)
 
         updateChapter(bookTitle, libraryJson)
@@ -302,7 +300,7 @@ def nextChap(site, bookTitle):
     for tag in aTag:
         try:
             line = tag.get_text()
-            if line == 'NEXT CHAPTER':
+            if line == 'NEXT CHAPTER' or line == 'Next Chapter':
                 return True
         except:
             continue
